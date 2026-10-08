@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { sendToBackground } from '@plasmohq/messaging';
 import { useTweetsStore } from './use-tweet-collection';
+import { WEBSITE_URL } from '@src/config/urls';
 
 export const InputCode = ({ onClose }) => {
     const [licenseKey, setLicenseKey] = useState('');
@@ -109,7 +110,7 @@ export const InputCode = ({ onClose }) => {
                         <span className="text-sm text-gray-300">Share on X (Twitter)</span>
                     </div>
                     <div className="bg-gray-800 p-3 rounded-md" onClick={() => {
-                        window.open('https://x.com/intent/tweet?url=https://x-cards.net&text=@FeigelC35583 Just discovered an amazing tool! @IndieDevr Check it out!&hashtags=IndieDevTool', '_blank');
+                        window.open(`https://x.com/intent/tweet?url=${WEBSITE_URL}&text=@FeigelC35583 Just discovered an amazing tool! @IndieDevr Check it out!&hashtags=IndieDevTool`, '_blank');
                     }}>
                         <p className="text-sm text-gray-300 mb-2" >Click Post this message:</p>
                         <p className="text-sm text-white font-medium">

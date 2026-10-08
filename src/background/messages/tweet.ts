@@ -1,12 +1,15 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 import * as _ from 'lodash-es'
+import { tweetApiUrl } from "@src/config/urls"
 
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     const action = req.body.action;
     if (action === 'get-tweet') {
         const url = req.body.url;
-        const response = await fetch(`https://x-cards.net/api/x?url=${url}`, {
+        // 注意：next.config.js 是 output: 'export'（静态导出），线上不含 API routes，
+        // 因此这个地址在部署环境里一直是 404，仅在 `next dev` 下可用。
+        const response = await fetch(tweetApiUrl(url), {
             method: 'GET',
 
         });

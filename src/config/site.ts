@@ -1,8 +1,10 @@
+import { WEBSITE_URL, LEGACY_STATIC_HOST } from "./urls"
+
 const baseSiteConfig = {
     name: "X Cards",
     description:
         "Share X anywhere, any format. A Chrome extension for easy access to X posts in multiple formats.",
-    url: "https://x-cards.net",
+    url: WEBSITE_URL,
     keywords: [
         "X.com",
         "Twitter",
@@ -26,12 +28,12 @@ const baseSiteConfig = {
     creator: '@IndieDevr',
     themeColor: '#fff',
     icons: {
-        icon: "https://static.usesless.com/x-cards/favicon/favicon.ico",
-        android: "https://static.usesless.com/x-cards/favicon/android-chrome-192x192.png",
-        shortcut: "https://static.usesless.com/x-cards/favicon/favicon.ico",
-        apple: "https://static.usesless.com/x-cards/favicon/apple-touch-icon.png",
+        icon: `${LEGACY_STATIC_HOST}/x-cards/favicon/favicon.ico`,
+        android: `${LEGACY_STATIC_HOST}/x-cards/favicon/android-chrome-192x192.png`,
+        shortcut: `${LEGACY_STATIC_HOST}/x-cards/favicon/favicon.ico`,
+        apple: `${LEGACY_STATIC_HOST}/x-cards/favicon/apple-touch-icon.png`,
     },
-    ogImage: "https://static.usesless.com/x-cards/favicon/x-cards-og.png",
+    ogImage: `${LEGACY_STATIC_HOST}/x-cards/favicon/x-cards-og.png`,
     links: {
         github: "https://github.com/hzeyuan/x-cards",
     },

@@ -1,4 +1,6 @@
 {
+    "buildCommand": "npm run build:next",
+    "outputDirectory": "out",
     "functions": {
         "app/api/**/*": {
             "maxDuration": 60

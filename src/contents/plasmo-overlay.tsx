@@ -5,6 +5,7 @@ import cssText from "data-text:@src/contents/plasmo-overlay.css"
 import { Toaster } from 'react-hot-toast';
 import { iframeMessageSystem } from '@src/app/utils/IFrameMessageSystem';
 import { sendToBackground } from '@plasmohq/messaging';
+import { independentUrl } from '@src/config/urls';
 import { useTweetsStore } from '@src/components/extension/use-tweet-collection';
 import { createRoot } from 'react-dom/client';
 export const config: PlasmoCSConfig = {
@@ -26,7 +27,7 @@ const AnchorOverlay: React.FC<PlasmoCSUIProps> = ({ anchor }) => {
     const iframeRef = useRef<HTMLIFrameElement>(null)
     const setIsActivated = useTweetsStore((state) => state.setIsActivated);
 
-    const websiteURL = "https://x-cards.net/independent";
+    const websiteURL = independentUrl();
     // const websiteURL = "http://127.0.0.1:1947/independent";
 
 

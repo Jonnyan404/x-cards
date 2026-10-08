@@ -17,7 +17,8 @@
     "build": "plasmo build",
     "start:next": "next start",
     "build:next": "next build",
-    "package": "plasmo package"
+    "package": "plasmo package",
+    "check:urls": "node tools/check-urls.mjs"
   },
   "dependencies": {
     "@csstools/convert-colors": "^2.0.0",

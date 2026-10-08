@@ -16,7 +16,7 @@ const Index = () => {
 
     useEffect(() => {
         const fn = async (event) => {
-            // if (event.origin !== 'https://x-cards.net') return;
+            // if (event.origin !== WEBSITE_URL) return;
             const actionName = 'generate-card-local'
             if (event.data.action === actionName) {
                 console.log('收到消息来自', event.data, event.origin);

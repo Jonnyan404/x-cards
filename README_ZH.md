@@ -22,8 +22,8 @@
 [github-issues-link]: https://github.com/hzeyuan/x-cards/issues
 [github-contributors-shield]: https://img.shields.io/github/contributors/hzeyuan/OpenGPTS?color=c4f042&labelColor=black&style=flat-square
 [github-contributors-link]: https://github.com/hzeyuan/OpenGPTS/graphs/contributors
-[vercel-link]: https://x-cards.net
-[vercel-shield]: https://img.shields.io/website?down_message=offline&label=vercel&labelColor=black&logo=vercel&style=flat-square&up_message=online&url=https://x-cards.net
+[vercel-link]: https://x-cards.vercel.app
+[vercel-shield]: https://img.shields.io/website?down_message=offline&label=vercel&labelColor=black&logo=vercel&style=flat-square&up_message=online&url=https://x-cards.vercel.app
 [share-linkedin-link]: https://linkedin.com/feed
 [share-linkedin-shield]: https://img.shields.io/badge/-share%20on%20linkedin-black?labelColor=black&logo=linkedin&logoColor=white&style=flat-square
 [share-reddit-link]: https://www.reddit.com/submit?title=x-cards&url=https://github.com/hzeyuan/x-cards
