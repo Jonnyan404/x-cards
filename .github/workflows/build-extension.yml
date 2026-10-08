@@ -77,6 +77,9 @@ jobs:
             echo "产物与上次一致，跳过提交"
             exit 0
           fi
-          git pull --rebase origin master
+          # 顺序要紧：先 commit 再 pull。带着未提交的 index 跑 pull --rebase
+          # 会直接报 "cannot pull with rebase: Your index contains uncommitted
+          # changes" 退出 128，把前面成功的构建全拖成红。
           git commit -m "chore: rebuild chrome extension [skip ci]"
+          git pull --rebase origin master
           git push origin master
