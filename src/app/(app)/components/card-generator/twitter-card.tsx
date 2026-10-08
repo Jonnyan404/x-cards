@@ -5,7 +5,7 @@ import XLogo from '@assets/x-logo.svg';
 import * as _ from "lodash-es"
 import { formatTimestamp } from '@src/app/utils/format';
 import type { CardStore, XConfig } from '@src/hooks/useCardStore';
-import { WEBSITE_HOST } from '@src/config/urls';
+import { CARD_WATERMARK } from '@src/config/branding';
 
 interface TwitterCardProps {
     xConfig: XConfig[],
@@ -28,7 +28,7 @@ export const TwitterCard: React.FC<TwitterCardProps> = ({ xConfig, backgroundSty
                     ))
                 }
                 <div className=' absolute right-0 bottom-0 opacity-40 text-[##6d6d6d]'>
-                    ∙ Made with {WEBSITE_HOST}
+                    ∙ {CARD_WATERMARK}
                 </div>
             </div>
         )
