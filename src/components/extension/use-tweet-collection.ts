@@ -1,6 +1,7 @@
 import type { CardStore, XConfig } from "@src/hooks/useCardStore";
 import { create } from "zustand";
 import { fontSizeMap } from "./x-cards-toast/font-control";
+import { FREE_MODE } from "@src/config/features";
 
 export interface TweetControlState {
     showUser: boolean;
@@ -68,7 +69,7 @@ export const useTweetsStore = create<TweetCollection>(
                 showCodeDialog
             })
         },
-        isActivated: false,
+        isActivated: FREE_MODE,
         setIsActivated: (isActivated: boolean) => {
             set({
                 isActivated

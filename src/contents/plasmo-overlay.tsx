@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { iframeMessageSystem } from '@src/app/utils/IFrameMessageSystem';
 import { sendToBackground } from '@plasmohq/messaging';
 import { independentUrl } from '@src/config/urls';
+import { FREE_MODE } from '@src/config/features';
 import { useTweetsStore } from '@src/components/extension/use-tweet-collection';
 import { createRoot } from 'react-dom/client';
 export const config: PlasmoCSConfig = {
@@ -40,6 +41,11 @@ const AnchorOverlay: React.FC<PlasmoCSUIProps> = ({ anchor }) => {
 
 
     useEffect(() => {
+        // 免费模式：直接放行。既不请求 Gumroad，也不让后台校验结果把 true 覆盖回去。
+        if (FREE_MODE) {
+            setIsActivated(true);
+            return;
+        }
         sendToBackground({
             name: 'code',
             body: {
