@@ -1,0 +1,82 @@
+name: Build Chrome extension
+
+# 构建 Chrome 扩展并把产物提交回仓库，这样本地不必装依赖、git pull 即可用。
+# 站点部署走 pages.yml，与这条互不相干。
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - "dist/**"
+      - "**/*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-extension
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm-lock.yaml 是 lockfileVersion 6，对应 pnpm 8
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      # 故意不注入 CRX_PUBLIC_KEY：配了 secret 但值为空时，manifest 会留下
+      # "key": "" 这种比 $CRX_PUBLIC_KEY 更隐蔽的坏值。留成占位符由下一步删掉。
+      # 想固定扩展 ID，在仓库 secrets 里配上 CRX_PUBLIC_KEY 即可。
+      - name: 构建扩展
+        run: pnpm build
+
+      - name: 收尾：清掉未替换的 manifest 占位符
+        run: node tools/finalize-extension.mjs build/chrome-mv3-prod
+
+      - name: 同步产物到 dist/extension
+        run: |
+          rm -rf dist/extension
+          mkdir -p dist
+          cp -r build/chrome-mv3-prod dist/extension
+
+      # 若被 .gitignore 挡住，git add 会静默什么都不做，而下面的
+      # "无变化就跳过" 会把这件事当成成功 —— 所以先显式验一次。
+      - name: 确认产物没有被 gitignore 挡住
+        run: |
+          if git check-ignore -q dist/extension/manifest.json; then
+            echo "::error::dist/extension 被 .gitignore 忽略，产物提交不上去"
+            git check-ignore -v dist/extension/manifest.json
+            exit 1
+          fi
+          echo "可提交"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chrome-mv3-prod
+          path: dist/extension
+          if-no-files-found: error
+
+      - name: 提交产物
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/extension
+          if git diff --cached --quiet; then
+            echo "产物与上次一致，跳过提交"
+            exit 0
+          fi
+          git pull --rebase origin master
+          git commit -m "chore: rebuild chrome extension [skip ci]"
+          git push origin master

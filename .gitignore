@@ -24,7 +24,12 @@ yarn-error.log*
 
 out/
 build/
-dist/
+
+# dist 里只放过 CI 构建出的扩展产物，其余照旧忽略。
+# 注意写法：忽略目录本身（dist/）后 git 不再递归进去，子目录的否定规则会失效，
+# 所以要写成 dist/* + 例外。
+dist/*
+!dist/extension/
 
 # plasmo
 .plasmo
