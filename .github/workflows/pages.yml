@@ -1,0 +1,116 @@
+name: Deploy site to GitHub Pages
+
+# 只部署站点（out/）。Chrome 扩展走的是另一条链路：submit.yml。
+on:
+  push:
+    branches: [master]
+    paths:
+      - "src/**"
+      - "next.config.js"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 排队部署，别让两次 push 互相取消导致 Pages 停在半路
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  # 站点地址与子路径。这三个值必须同时成立：
+  #   src/config/urls.ts 的 WEBSITE_URL == PAGES_SITE_URL
+  #   WEBSITE_URL 的路径部分      == BASE_PATH
+  # 换仓库名或绑自定义域名时三处一起改，否则扩展的 iframe 会静默 404 ——
+  # 构建和部署都是绿的，只有用户在 x.com 上点了按钮才发现卡片出不来。
+  # 绑了自定义域名的话：PAGES_SITE_URL 改成 https://<域名>，BASE_PATH 留空。
+  PAGES_SITE_URL: https://jonnyan404.github.io/x-cards
+  BASE_PATH: /x-cards
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm-lock.yaml 是 lockfileVersion 6，对应 pnpm 8
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      # 部署前拦一道：地址对不上的话，后面全是白干
+      - name: 校验站点地址与 Pages 地址一致
+        run: node tools/check-pages.mjs --site "$PAGES_SITE_URL" --base-path "$BASE_PATH"
+
+      - name: 构建静态站点
+        run: pnpm build:next
+
+      - name: 校验产物里真的有 independent 页面
+        run: node tools/check-pages.mjs --site "$PAGES_SITE_URL" --base-path "$BASE_PATH" --out
+
+      # 以后想绑回自定义域名，推荐走 Settings → Pages → Custom domain：
+      # Actions 部署不会自动写 CNAME，仓库里已有的 CNAME 也不一定被采纳。
+      # 在仓库变量 PAGES_CNAME 里填上域名则会走下面这步，双保险。
+      - name: 写入自定义域名（可选）
+        if: vars.PAGES_CNAME != ''
+        run: echo "${{ vars.PAGES_CNAME }}" > out/CNAME
+
+      # Jekyll 会跳过下划线开头的目录，_next 一旦被吃掉站点就白屏。
+      # 用 Actions 部署时它未必还会跑，但这个文件成本为零，留着防身。
+      - name: 跳过 Jekyll
+        run: touch out/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      # 部署成功 ≠ 能用。这一条验的是真正决定成败的两件事：页面在不在，
+      # 以及能不能被 x.com iframe 内嵌（托管方一旦加 X-Frame-Options 就全废）。
+      - name: 部署后探活
+        run: |
+          BASE="${{ steps.deployment.outputs.page_url }}"
+          if [ -z "$BASE" ]; then
+            echo "::error::拿不到 page_url，部署可能没成功"
+            exit 1
+          fi
+          for p in "" "independent/"; do
+            URL="${BASE}${p}"
+            code=000
+            # Pages 官方说首次发布最长要 10 分钟，这里给 20 次 × 15 秒
+            for i in $(seq 1 20); do
+              code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "$URL" || echo 000)
+              [ "$code" = "200" ] && break
+              sleep 15
+            done
+            echo "$URL -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "::error::$URL 返回 HTTP $code（已重试 20 次共 5 分钟）"
+              exit 1
+            fi
+          done
+          if curl -sS -D - -o /dev/null "$BASE" | grep -qi 'x-frame-options\|frame-ancestors'; then
+            echo "::error::响应带 X-Frame-Options / frame-ancestors，X 页面无法内嵌这个 iframe"
+            exit 1
+          fi
+          echo "探活通过：站点可访问，且允许被 iframe 内嵌"

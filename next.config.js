@@ -1,19 +1,25 @@
-// const isProd = process.env.NODE_ENV === 'production'
-const isProd = false;
 const bundleAnalyzer = require('@next/bundle-analyzer')
 const withBundleAnalyzer = bundleAnalyzer({
     enabled: false,
     openAnalyzer: true,
 })
 
+/**
+ * GitHub Pages 的项目页是子路径形式：https://<user>.github.io/<repo>/
+ * 静态产物必须整体下移，否则 /_next/static/... 会 404。
+ * 本地开发不设这个变量，basePath 为空，行为与以前完全一致。
+ * CI 里由 tools/check-pages.mjs 断言它和 urls.ts 的 WEBSITE_URL 一致。
+ */
+const basePath = process.env.BASE_PATH || "";
 
 module.exports = withBundleAnalyzer({
+    basePath,
+    // Pages 按「目录 + index.html」托管，带尾斜杠能一次命中、不走重定向。
+    // 改这一条必须同步改 src/config/urls.ts 里各个 Url() 的尾斜杠。
+    trailingSlash: true,
     swcMinify: true,
     crossOrigin: 'anonymous',
     reactStrictMode: false,
-    env: {
-        STATIC_URL: isProd ? STATIC_URL : "http://localhost:3000",
-    },
     // typescript: {
     //     ignoreBuildErrors: true,
     // },
