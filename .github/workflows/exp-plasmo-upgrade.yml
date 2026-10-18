@@ -3,18 +3,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  # 每个组合独立跑：装指定版本的 plasmo，放最小 popup，看构建结果
   exp:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - label: "0.88.0 + .parcelrc"
-            plasmo: "0.88.0"
-          - label: "0.90.5 + .parcelrc"
-            plasmo: "0.90.5"
-    name: ${{ matrix.label }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,46 +20,31 @@ jobs:
       - name: 装依赖
         run: pnpm install --frozen-lockfile
 
-      - name: 装指定版本的 plasmo
+      # 不新增 popup 入口，让 manifest 直接指向已经构建出来的 tabs 页面
+      - name: 给 manifest 加 default_popup
         run: |
-          pnpm add -D plasmo@${{ matrix.plasmo }}
-          node -p "'plasmo=' + require('./node_modules/plasmo/package.json').version"
+          python3 - <<'PY'
+          import json
+          d = json.load(open('package.json'))
+          m = d.setdefault('manifest', {})
+          m['action'] = {'default_popup': './tabs/servers.html'}
+          json.dump(d, open('package.json', 'w'), indent=2, ensure_ascii=False)
+          print('manifest =', json.dumps(d['manifest'], ensure_ascii=False))
+          PY
 
-      # issue #1331 的做法：Parcel 默认 resolver 处理不了，显式指定它
-      - name: 加 .parcelrc
-        run: |
-          pnpm add -D @parcel/config-default@2.9.3 @parcel/resolver-default@2.9.3
-          cat > .parcelrc <<'EOF'
-          {
-            "extends": "@parcel/config-default",
-            "resolvers": ["@parcel/resolver-default"]
-          }
-          EOF
-          cat .parcelrc
-
-      - name: 放一个最小 popup 进 src
-        run: |
-          cat > src/popup.tsx <<'EOF'
-          import { useState } from "react";
-          export default function IndexPopup() {
-            const [n] = useState(1);
-            return <div style={{ width: 200 }}>popup ok {n}</div>;
-          }
-          EOF
-
-      - name: 构建（允许失败）
+      - name: 构建
         id: b
         continue-on-error: true
         run: pnpm build
 
       - name: 结论
         run: |
-          echo "### ${{ matrix.label }} => 构建 ${OUTCOME}"
+          echo "构建 = ${OUTCOME}"
+          ls -la build/chrome-mv3-prod | head -20
           if [ -f build/chrome-mv3-prod/manifest.json ]; then
-            python3 -c "import json;m=json.load(open('build/chrome-mv3-prod/manifest.json'));print('default_popup =', m.get('action',{}).get('default_popup'))"
-            find build/chrome-mv3-prod -maxdepth 1 -name '*.html'
-          else
-            echo "manifest 不存在 => 构建失败"
+            python3 -c "import json;m=json.load(open('build/chrome-mv3-prod/manifest.json'));print('action =', json.dumps(m.get('action')))"
           fi
+          echo "--- tabs 目录 ---"
+          ls -la build/chrome-mv3-prod/tabs
         env:
           OUTCOME: ${{ steps.b.outcome }}
