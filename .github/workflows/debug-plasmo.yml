@@ -1,0 +1,27 @@
+name: Debug plasmo popup
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: 看看 plasmo 生成了什么
+        run: |
+          set +e
+          pnpm build
+          echo "=== pwd ==="; pwd
+          echo "=== src/popup.tsx ==="; ls -la src/popup.tsx
+          echo "=== .plasmo 目录 ==="; ls -la .plasmo
+          echo "=== .plasmo/static ==="; ls -la .plasmo/static
+          echo "=== 生成的 popup.tsx 内容 ==="; cat .plasmo/static/popup.tsx
+          echo "=== 生成的其它入口 ==="; ls -la .plasmo/static/
