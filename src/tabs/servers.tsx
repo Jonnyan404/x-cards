@@ -12,18 +12,22 @@ import {
     type ServerEntry,
 } from "@src/config/servers";
 
-// popup 页面不走项目的 tailwind 管线，样式全部内联，避免打包时缺 css。
+// 扩展页面不走项目的 tailwind 管线，样式全部内联，避免打包时缺 css。
 const s: Record<string, React.CSSProperties> = {
-    wrap: {
-        width: 380,
-        padding: 16,
+    page: {
+        minHeight: "100vh",
+        background: "#fff",
         fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         color: "#111",
-        background: "#fff",
     },
-    title: { margin: 0, fontSize: 15, fontWeight: 600 },
-    sub: { margin: "2px 0 12px", fontSize: 12, color: "#6b7280" },
+    wrap: {
+        maxWidth: 520,
+        margin: "0 auto",
+        padding: "32px 20px",
+    },
+    title: { margin: 0, fontSize: 18, fontWeight: 600 },
+    sub: { margin: "4px 0 20px", fontSize: 13, color: "#6b7280" },
     row: {
         display: "flex",
         alignItems: "center",
@@ -87,7 +91,7 @@ const s: Record<string, React.CSSProperties> = {
     empty: { fontSize: 12, color: "#6b7280", padding: "6px 0" },
 };
 
-const IndexPopup = () => {
+const ServersPage = () => {
     const [servers, setServers] = useState<ServerEntry[]>([]);
     const [activeId, setActiveId] = useState<string>("");
     const [name, setName] = useState("");
@@ -96,6 +100,7 @@ const IndexPopup = () => {
     const [hint, setHint] = useState("");
 
     useEffect(() => {
+        document.title = "Tweet Cards · 服务端";
         (async () => {
             const [list, active] = await Promise.all([getServers(), getActiveServer()]);
             setServers(list);
@@ -167,6 +172,7 @@ const IndexPopup = () => {
     };
 
     return (
+        <div style={s.page}>
         <div style={s.wrap}>
             <h1 style={s.title}>Tweet Cards</h1>
             <p style={s.sub}>选择卡片渲染用的服务端，可自行添加自部署地址</p>
@@ -235,7 +241,8 @@ const IndexPopup = () => {
                 </div>
             </div>
         </div>
+        </div>
     );
 };
 
-export default IndexPopup;
+export default ServersPage;

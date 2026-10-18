@@ -1,5 +1,11 @@
 import { getActiveServer, rootUrlFor } from "@src/config/servers";
 
+// 服务器管理页是一个 tabs 页面（src/tabs/servers.tsx）。
+// 它没做成 popup，是因为 Plasmo 0.88 在带 src/ 目录的项目里生成 popup 入口后
+// 解析不到（Failed to resolve '../../src/popup.tsx'），构建直接失败；
+// tabs 页面走另一条生成路径，是好的。
+export const SERVERS_PAGE = "tabs/servers.html";
+
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "checkInstallation") {
@@ -19,5 +25,7 @@ chrome.runtime.onInstalled.addListener(async function (details) {
     }
 });
 
-// 图标点击交给 popup（popup.tsx）。MV3 下只要 action 有 default_popup，
-// chrome.action.onClicked 就不会再触发，所以这里不注册。
+// 点图标打开服务器管理页
+chrome.action.onClicked.addListener(function (tab) {
+    chrome.tabs.create({ url: chrome.runtime.getURL(SERVERS_PAGE) });
+});
