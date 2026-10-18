@@ -1,0 +1,62 @@
+name: "Exp plasmo upgrade"
+on:
+  workflow_dispatch:
+
+jobs:
+  exp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: 装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 升级 plasmo 到最新版
+        run: |
+          pnpm add -D plasmo@0.90.5
+          echo "--- 实际装上的版本 ---"
+          node -p "require('./node_modules/plasmo/package.json').version"
+
+      # 用最小 popup，排除「是我这个文件的代码有问题」这个可能
+      - name: 放一个最小 popup 进 src
+        run: |
+          cat > src/popup.tsx <<'EOF'
+          import { useState } from "react";
+          export default function IndexPopup() {
+            const [n] = useState(1);
+            return <div style={{ width: 200 }}>popup ok {n}</div>;
+          }
+          EOF
+
+      - name: 构建（允许失败）
+        id: b
+        continue-on-error: true
+        run: pnpm build
+
+      - name: 结论
+        run: |
+          echo "构建结果 = ${OUTCOME}"
+          echo "--- manifest 是否存在 ---"
+          if [ -f build/chrome-mv3-prod/manifest.json ]; then
+            python3 - <<'PY'
+          import json
+          m = json.load(open('build/chrome-mv3-prod/manifest.json'))
+          print('default_popup =', m.get('action', {}).get('default_popup'))
+          print('name =', m.get('name'))
+          PY
+            echo "--- 产物里的 html ---"
+            find build/chrome-mv3-prod -maxdepth 1 -name '*.html'
+          else
+            echo "manifest 不存在（构建失败）"
+          fi
+        env:
+          OUTCOME: ${{ steps.b.outcome }}
