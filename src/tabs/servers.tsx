@@ -14,17 +14,20 @@ import {
 
 // 扩展页面不走项目的 tailwind 管线，样式全部内联，避免打包时缺 css。
 const s: Record<string, React.CSSProperties> = {
+    // 这个页面同时被当 popup 打开（manifest 的 action.default_popup 指向它），
+    // 所以不能用 minHeight:100vh —— popup 的高度由内容决定，100vh 会把它撑到
+    // Chrome 允许的 600px 上限，底下留一大片空白。固定宽度给 popup 一个稳定尺寸，
+    // margin auto 让它在标签页里居中。
     page: {
-        minHeight: "100vh",
+        width: 460,
+        margin: "0 auto",
         background: "#fff",
         fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         color: "#111",
     },
     wrap: {
-        maxWidth: 520,
-        margin: "0 auto",
-        padding: "32px 20px",
+        padding: "18px 16px",
     },
     title: { margin: 0, fontSize: 18, fontWeight: 600 },
     sub: { margin: "4px 0 20px", fontSize: 13, color: "#6b7280" },
@@ -171,6 +174,11 @@ const ServersPage = () => {
         chrome.tabs.create({ url: welcomeUrlFor(active) });
     };
 
+    // popup 有 600px 的高度上限，服务器多的时候需要完整视图
+    const openAsTab = () => {
+        chrome.tabs.create({ url: chrome.runtime.getURL("tabs/servers.html") });
+    };
+
     return (
         <div style={s.page}>
         <div style={s.wrap}>
@@ -232,6 +240,9 @@ const ServersPage = () => {
                     恢复默认
                 </button>
                 <div style={{ display: "flex", gap: 6 }}>
+                    <button style={s.btn} onClick={openAsTab}>
+                        展开
+                    </button>
                     <button style={s.btn} onClick={openSite}>
                         打开站点
                     </button>

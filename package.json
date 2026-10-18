@@ -115,6 +115,9 @@
       "storage",
        "tabs"
     ],
-    "key": "$CRX_PUBLIC_KEY"
+    "key": "$CRX_PUBLIC_KEY",
+    "action": {
+      "default_popup": "./tabs/servers.html"
+    }
   }
 }

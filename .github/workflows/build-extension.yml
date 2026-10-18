@@ -64,6 +64,20 @@ jobs:
           fi
           echo "服务器管理页已产出"
 
+      # default_popup 是手写进 package.json 的 manifest 覆写，Plasmo 不会替我们生成。
+      # 一旦丢掉，点图标什么都不弹，而构建照样是绿的 —— 只有这里能拦住。
+      - name: 确认 manifest 里点图标会弹 popup
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          m = json.load(open('build/chrome-mv3-prod/manifest.json'))
+          popup = m.get('action', {}).get('default_popup')
+          if not popup:
+              print('::error::manifest 没有 action.default_popup，点图标不会弹出面板')
+              sys.exit(1)
+          print('default_popup =', popup)
+          PY
+
       - name: 同步产物到 dist/extension
         run: |
           rm -rf dist/extension
