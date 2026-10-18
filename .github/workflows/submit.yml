@@ -6,27 +6,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Cache pnpm modules
-        uses: actions/cache@v3
+      - uses: actions/checkout@v4
+
+      # pnpm-lock.yaml 是 lockfileVersion 6，对应 pnpm 8
+      - uses: pnpm/action-setup@v4
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
-      - uses: pnpm/action-setup@v2.2.4
+          version: 8
+
+      # 原来是 16.x：Plasmo 0.88 在上面装不起来，而且 Actions 端早已弃用
+      - uses: actions/setup-node@v4
         with:
-          version: latest
-          run_install: true
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v3.4.1
-        with:
-          node-version: 16.x
-          cache: "pnpm"
-      - name: Build the extension
+          node-version: 20
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 服务端地址逻辑自检
+        run: node tools/test-servers.mjs
+
+      - name: 构建扩展
         run: pnpm build
-      - name: Package the extension into a zip artifact
+        env:
+          # 留空也没关系：finalize 会把没替换成功的占位符和空串一起删掉。
+          # 拿到固定的公钥后填进仓库 secrets，扩展 ID 就不会每次都变。
+          CRX_PUBLIC_KEY: ${{ secrets.CRX_PUBLIC_KEY }}
+
+      # 少了这一步，提交上去的 zip 里会带 "key": "$CRX_PUBLIC_KEY"，
+      # Chrome 商店会因为 key 不是合法 base64 公钥而拒收整个包。
+      - name: 收尾：清掉未替换的 manifest 占位符
+        run: node tools/finalize-extension.mjs build/chrome-mv3-prod
+
+      - name: 打包
         run: pnpm package
+
       - name: Browser Platform Publish
         uses: PlasmoHQ/bpp@v3
         with:

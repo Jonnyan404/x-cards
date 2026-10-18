@@ -1,7 +1,7 @@
 {
-  "name": "X Cards Native Tweet Card service for X",
-  "displayName": "Seamlessly integrate card services directly on your X",
-  "version": "0.0.3",
+  "name": "tweet-cards",
+  "displayName": "Tweet Cards",
+  "version": "1.0.0",
   "description": "Turn tweets into beautiful cards on X. Pick the card server you trust, or point the extension at your own self-hosted one.",
   "keywords": [
     "x",
