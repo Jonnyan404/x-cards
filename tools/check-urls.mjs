@@ -9,7 +9,7 @@
  *   node tools/check-urls.mjs          静态检查（离线，适合 CI）
  *   node tools/check-urls.mjs --probe  额外联网探活 WEBSITE_URL
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -57,7 +57,13 @@ function importLines(src) {
   return found.join("\n");
 }
 
-const files = walk(SRC);
+// popup.tsx 在仓库根目录（Plasmo 的约定位置），不进 src，单独带上，
+// 否则它引用 config 里的符号漏了 import 也发现不了
+const ROOT_TSX = ["popup.tsx", "options.tsx"]
+  .filter((f) => existsSync(join(ROOT, f)))
+  .map((f) => join(ROOT, f));
+
+const files = [...walk(SRC), ...ROOT_TSX];
 const errors = [];
 let useCount = 0;
 
@@ -107,36 +113,63 @@ for (const f of files) {
   }
 }
 
+// 4.5 扩展的默认服务器地址：不能是已死域名，否则装完就是坏的
+// 纯逻辑在 server-url.ts，storage 部分在 servers.ts，两处都找一遍，
+// 免得以后挪动位置就把这条检查落空
+const serversSrc = configSources.get("server-url.ts") ?? configSources.get("servers.ts");
+const officialUrl = serversSrc?.match(
+  /export const OFFICIAL_SERVER[\s\S]*?url:\s*"([^"]+)"/
+)?.[1];
+if (!officialUrl) {
+  errors.push("servers.ts 里找不到 OFFICIAL_SERVER 的地址");
+} else {
+  for (const d of DEAD_DOMAINS) {
+    if (officialUrl.includes(d)) {
+      errors.push(`servers.ts 的 OFFICIAL_SERVER 指向已失效域名 ${d} -> ${officialUrl}`);
+    }
+  }
+}
+
 console.log(`扫描 ${files.length} 个源文件，符号引用 ${useCount} 处`);
 
 // 5. 可选：联网探活。这一条正是当初定位到根因的手段 —— 域名过期在
 //    静态检查里看不出来，只有真的连一次才暴露。
-if (process.argv.includes("--probe") && websiteUrl) {
-  // 尾斜杠跟着 next.config.js 的 trailingSlash 走，否则探的是 301 而不是页面本身
+if (process.argv.includes("--probe")) {
   const trailingSlash = /trailingSlash:\s*true/.test(
     readFileSync(join(ROOT, "next.config.js"), "utf8")
   );
-  const target = `${websiteUrl}/independent${trailingSlash ? "/" : ""}`;
-  let ok = true;
-  try {
-    const res = await fetch(target, { redirect: "follow" });
-    if (!res.ok) {
-      ok = false;
-      errors.push(`探活失败: ${target} -> HTTP ${res.status}`);
+
+  // 两个都探：站点自身的地址，以及扩展出厂默认指向的官方地址。
+  // 前者挂了是自部署的问题，后者挂了是每一个新装用户的开箱即用坏了。
+  const targets = [];
+  if (websiteUrl) {
+    // 尾斜杠跟着 next.config.js 的 trailingSlash 走，否则探的是 301 而不是页面本身
+    targets.push(`${websiteUrl}/independent${trailingSlash ? "/" : ""}`);
+  }
+  if (officialUrl) targets.push(`${officialUrl}/independent`);
+
+  for (const target of targets) {
+    let ok = true;
+    try {
+      const res = await fetch(target, { redirect: "follow" });
+      if (!res.ok) {
+        ok = false;
+        errors.push(`探活失败: ${target} -> HTTP ${res.status}`);
+      }
+      const xfo = res.headers.get("x-frame-options");
+      const csp = res.headers.get("content-security-policy") ?? "";
+      if (xfo) {
+        ok = false;
+        errors.push(`带 X-Frame-Options: ${xfo}，X 页面无法内嵌这个 iframe`);
+      }
+      if (csp.includes("frame-ancestors")) {
+        ok = false;
+        errors.push(`带 frame-ancestors 限制，X 页面无法内嵌这个 iframe`);
+      }
+      if (ok) console.log(`探活通过: ${target} 可访问且允许内嵌`);
+    } catch (e) {
+      errors.push(`探活失败: ${target} -> ${e.cause?.code ?? e.message}`);
     }
-    const xfo = res.headers.get("x-frame-options");
-    const csp = res.headers.get("content-security-policy") ?? "";
-    if (xfo) {
-      ok = false;
-      errors.push(`带 X-Frame-Options: ${xfo}，X 页面无法内嵌这个 iframe`);
-    }
-    if (csp.includes("frame-ancestors")) {
-      ok = false;
-      errors.push(`带 frame-ancestors 限制，X 页面无法内嵌这个 iframe`);
-    }
-    if (ok) console.log(`探活通过: ${target} 可访问且允许内嵌`);
-  } catch (e) {
-    errors.push(`探活失败: ${target} -> ${e.cause?.code ?? e.message}`);
   }
 }
 

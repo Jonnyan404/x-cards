@@ -1,12 +1,18 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import type { PlasmoCSConfig, PlasmoCSUIProps, PlasmoRender } from "plasmo"
 // import 'tippy.js/dist/tippy.css';
 import cssText from "data-text:@src/contents/plasmo-overlay.css"
 import { Toaster } from 'react-hot-toast';
 import { iframeMessageSystem } from '@src/app/utils/IFrameMessageSystem';
+import Browser from 'webextension-polyfill';
 import { sendToBackground } from '@plasmohq/messaging';
-import { independentUrl } from '@src/config/urls';
 import { FREE_MODE } from '@src/config/features';
+import {
+    getActiveServer,
+    independentUrlFor,
+    SERVERS_KEY,
+    ACTIVE_SERVER_KEY,
+} from '@src/config/servers';
 import { useTweetsStore } from '@src/components/extension/use-tweet-collection';
 import { createRoot } from 'react-dom/client';
 export const config: PlasmoCSConfig = {
@@ -28,9 +34,31 @@ const AnchorOverlay: React.FC<PlasmoCSUIProps> = ({ anchor }) => {
     const iframeRef = useRef<HTMLIFrameElement>(null)
     const setIsActivated = useTweetsStore((state) => state.setIsActivated);
 
-    const websiteURL = independentUrl();
-    // const websiteURL = "http://127.0.0.1:1947/independent";
+    // 渲染地址来自用户选的服务器，所以要先读一次 storage 再挂 iframe。
+    // 空字符串时先不渲染，避免用默认地址加载完再换一次造成重复请求。
+    const [websiteURL, setWebsiteURL] = useState('');
 
+    useEffect(() => {
+        let alive = true;
+
+        const sync = async () => {
+            const server = await getActiveServer();
+            if (alive) setWebsiteURL(independentUrlFor(server));
+        };
+        sync();
+
+        // 在 popup 里改完地址，已经打开的 x.com 标签页要立刻跟上
+        const onChanged = (changes: Record<string, unknown>, area: string) => {
+            if (area !== 'local') return;
+            if (changes[SERVERS_KEY] || changes[ACTIVE_SERVER_KEY]) sync();
+        };
+        Browser.storage.onChanged.addListener(onChanged);
+
+        return () => {
+            alive = false;
+            Browser.storage.onChanged.removeListener(onChanged);
+        };
+    }, []);
 
     useEffect(() => {
         const unsubscribe = iframeMessageSystem.subscribe('generate-card-local', (value: any) => {
@@ -66,10 +94,12 @@ const AnchorOverlay: React.FC<PlasmoCSUIProps> = ({ anchor }) => {
     return (
         <div>
             {/* <PreviewToast tweetInfo={{}} tweetInfos={[]} /> */}
+            {websiteURL && (
             <iframe
                 ref={iframeRef}
                 id="x-card-ai"
                 src={websiteURL}
+                key={websiteURL}
                 style={{
                     width: '100vw',
                     height: '0px',
@@ -77,6 +107,7 @@ const AnchorOverlay: React.FC<PlasmoCSUIProps> = ({ anchor }) => {
                     opacity: 0,
                 }}
             />
+            )}
         </div >
     )
 }

@@ -23,6 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 不需要装依赖就能跑，放最前面：逻辑错了就没必要等一次完整构建
+      - name: 服务端地址逻辑自检
+        run: node tools/test-servers.mjs
+
+      - name: 地址引用自检
+        run: node tools/check-urls.mjs
+
       # pnpm-lock.yaml 是 lockfileVersion 6，对应 pnpm 8
       - uses: pnpm/action-setup@v4
         with:
