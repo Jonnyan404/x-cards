@@ -52,6 +52,18 @@ jobs:
       - name: 收尾：清掉未替换的 manifest 占位符
         run: node tools/finalize-extension.mjs build/chrome-mv3-prod
 
+      # 点图标打开的就是这个页面。Plasmo 0.88 的 popup 入口在带 src/ 的项目里
+      # 构建不过（Failed to resolve '../../src/popup.tsx'），所以用的是 tabs 页面；
+      # 要是哪天它被改名或不再生成，构建依然绿、只是点了图标开一个空白页 —— 这里拦住。
+      - name: 确认服务器管理页真的产出了
+        run: |
+          if [ ! -f build/chrome-mv3-prod/tabs/servers.html ]; then
+            echo "::error::找不到 build/chrome-mv3-prod/tabs/servers.html，点图标会打开空白页"
+            find build/chrome-mv3-prod -name "*.html" | sort
+            exit 1
+          fi
+          echo "服务器管理页已产出"
+
       - name: 同步产物到 dist/extension
         run: |
           rm -rf dist/extension
