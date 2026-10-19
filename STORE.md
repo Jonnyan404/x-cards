@@ -121,11 +121,12 @@ workflow 会：构建 → 清掉 manifest 占位符 → 打包 → 上传 → pu
 
 **隐私政策 URL**：https://github.com/Jonnyan404/x-cards/blob/master/PRIVACY.md
 
-**权限说明**（审核时逐项要填）：
+**权限说明**（逐项要填，英文可直接粘贴）：
 
-- `storage` — 记住你的服务器列表和当前选择
-- `tabs` — 按你的点击打开服务器站点和说明页
-- 内容脚本只在 `https://x.com/*` 注入，其它站点一律不注入
+| 权限 | 粘贴这段 |
+|---|---|
+| `storage` | Keeps the list of card-render servers and which one is currently active. Values stay in `chrome.storage.local` and are never transmitted anywhere. |
+| `tabs` | Opens the card site and the usage guide in a new tab when the user clicks those two buttons in the extension popup. The extension never reads tab URLs or tab content. |
 
 **截图**：1280×800 或 640×400，至少 1 张。
 
@@ -136,8 +137,52 @@ workflow 会：构建 → 清掉 manifest 占位符 → 打包 → 上传 → pu
 
 建议再补两张：导出后的成品图、服务器管理面板（点图标弹出的那个）。
 
-## 五、一个可能被测到的点
+## 五、商店问卷的三个问题（英文可直接粘贴）
 
-扩展用 iframe 加载远端页面来渲染卡片。商店政策禁止的是「下载并执行远程代码」，
-而这里加载的是一个普通网页（跑在它自己的 origin，拿不到任何扩展 API），
-性质等同内嵌 YouTube。但审核员可能问一句，届时就这么答，并说明用户可换成自建地址。
+### 0. Single purpose
+
+> Turn an X (Twitter) post into a shareable image. On x.com the extension adds one button to
+> each post; clicking it reads that post's public content and renders it as an image the user
+> can copy or download. Font, colour, width, padding, export scale and merging a thread only
+> change how that single card looks — they are settings of the same action, not separate features.
+
+要点：只说**一件事**，并把所有功能都归到这件事的「参数」上。审核看的是"有没有第二用途"。
+
+### 1. 主机权限理由（`https://x.com/*`）
+
+扩展**没有声明 `host_permissions`**，唯一的站点接触就是内容脚本的 `matches`。填这段：
+
+> The content script runs on `https://x.com/*` only. It has to be there for two reasons: the card
+> button is injected into the post's own action bar, and the card is built from that post's
+> content. When the user clicks the button, the script reads the post already rendered on the
+> page — its text, display name, handle, timestamp, reply/repost/like counts and the image URLs
+> in the post — and passes them to the renderer. It does not read other tabs, browsing history,
+> cookies, or any other site. The extension declares no `host_permissions` and no
+> `optional_host_permissions`, so x.com is the only origin it can reach.
+
+### 2. 远程代码
+
+**答：No。**
+
+判据是官方 MV3 政策原文 —— 位于 iframe 这类**拿不到扩展 API 的隔离环境**里的代码，
+**豁免**于远程代码限制（"code run in contexts that are isolated from extension APIs
+(such as iframes and sandboxed pages) are exempt"）。我们的情况正好落在这条例外里。
+
+但要在「给审核员的备注」里主动说明，别让他自己发现：
+
+> No remotely hosted code is executed by the extension. The submitted package contains all of its
+> logic — there is no `eval`, no `new Function`, and no script tag pointing outside the package.
+>
+> The extension does embed one iframe pointing at the card renderer (default
+> `https://x-cards.vercel.app/independent/`; users may point it at their own deployment). That
+> page is a normal web page in its own origin: it has no access to `chrome.*` APIs, and the only
+> channel between it and the extension is `window.postMessage`, carrying the post data in and the
+> resulting PNG data URL back. Chrome's MV3 policy exempts code running in contexts isolated from
+> extension APIs, such as iframes. Flagging it here so the whole flow is visible during review.
+
+**万一被判 RHC（Blue Argon）**：回复时把上面那句政策原文贴出来，并说明 iframe 拿不到
+`chrome.*`、只靠 postMessage 通信。不要改口说"有远程代码"——那会变成需要整改的违规项。
+
+⚠️ 另外提醒：`dist/extension` 里能搜到 `document.createElement("script")`，那是
+core-js 的 `setImmediate` polyfill 用来当定时器的空 script 标签，**从不设 `src`**，
+不是远程加载。若审核问起，照这句答。
