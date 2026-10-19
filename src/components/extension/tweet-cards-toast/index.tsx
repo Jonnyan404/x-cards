@@ -9,7 +9,6 @@ import type { PlasmoCSUIProps } from 'plasmo';
 import TweetManager from '../tweet-manager';
 import toast from 'react-hot-toast';
 import { cn } from '@lib/utils';
-import { InputCode } from '../input-code';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTweetsStore } from '../use-tweet-collection';
 import ImagePreview from './image-preview';
@@ -30,8 +29,6 @@ interface PreviewToastProps {
 export const PreviewToast: React.FC<PreviewToastProps> = ({ tweetInfo, tweetInfos, anchor, }) => {
     const [isLoading, setIsLoading] = useState(false);
     const srcRef = useRef<string>();
-    const showCodeDialog = useTweetsStore(state => state.showCodeDialog);
-    const setShowCodeDialog = useTweetsStore(state => state.setShowCodeDialog);
 
     const setImageSrc = useTweetsStore(state => state.setImageSrc);
     const [tweetStyle] = useState('posts');
@@ -44,16 +41,15 @@ export const PreviewToast: React.FC<PreviewToastProps> = ({ tweetInfo, tweetInfo
     const setCardConfig = useTweetsStore(state => state.setCardConfig);
     const tweets = useTweetsStore(state => state.tweets);
     const activeTab = useTweetsStore(state => state.activeTab);
-    const isActivated = useTweetsStore((state) => state.isActivated);
     const [isPreview, showIsPreview] = useState(false);
 
 
     const tabs = useMemo(() => {
         return [
             { value: 'single', label: 'Single' },
-            { value: 'linear', label: 'Linear', isLocked: !isActivated },
+            { value: 'linear', label: 'Linear' },
         ]
-    }, [isActivated])
+    }, [])
 
     const styles = {
         container: {
@@ -128,14 +124,6 @@ export const PreviewToast: React.FC<PreviewToastProps> = ({ tweetInfo, tweetInfo
     }
     }
 `
-    const canPass = () => {
-        if (!isActivated && activeTab === 'linear') {
-            setShowCodeDialog(true);
-            return false;
-        }
-        return true;
-    }
-
     const handleCopyImage = async () => {
         if (selectedFormat === 'md') {
             const md = tweet2Markdown(tweets);
@@ -361,10 +349,6 @@ export const PreviewToast: React.FC<PreviewToastProps> = ({ tweetInfo, tweetInfo
         <FontControl></FontControl>
 
         <ScaleControl value={cardConfig.scale} onChange={v => {
-            if (!isActivated) {
-                useTweetsStore.getState().setShowCodeDialog(true);
-                return;
-            }
             setCardConfig({
                 scale: v,
             });
@@ -382,12 +366,6 @@ export const PreviewToast: React.FC<PreviewToastProps> = ({ tweetInfo, tweetInfo
         </button>
 
         <span className='text-xs text-neutral-400 absolute  pt-2 bottom-1 right-4 '>
-            <div className='flex justify-between'>
-                <button onClick={() => {
-                    setShowCodeDialog(true);
-                }} className=' text-blue-500 mr-4'>Get License</button>
-                <span> DM <a target='_blank' href="https://x.com/IndieDevr" className=' text-blue-500'>@IndieDevr</a>  unlock all features</span>
-            </div>
             <div className=' flex  justify-end items-center'>
                 <a target="_blank" href="https://discord.gg/Prjas7Qh">
                     <svg
@@ -459,12 +437,6 @@ export const PreviewToast: React.FC<PreviewToastProps> = ({ tweetInfo, tweetInfo
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            <AnimatePresence>
-                {showCodeDialog && <InputCode onClose={() => setShowCodeDialog(false)} />}
-            </AnimatePresence>
-
-
 
         </motion.div >
 

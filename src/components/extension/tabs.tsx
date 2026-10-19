@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Lock } from 'lucide-react';
 import { useTweetsStore } from './use-tweet-collection';
 const Tabs: React.FC<{
-  tabs: { label: string; value: string, isLocked?: boolean }[];
+  tabs: { label: string; value: string }[];
   defaultTab?: string;
 }> = ({ tabs }) => {
 
@@ -49,7 +48,6 @@ const Tabs: React.FC<{
           }}
           onClick={() => handleTabClick(tab.value)}
         >
-          {tab?.isLocked && <Lock className='  w-4 h-4 mr-2 text-gray-400  ' />}
           <span>{tab.label}</span>
         </button>
       ))}

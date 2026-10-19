@@ -5,8 +5,6 @@ import cssText from "data-text:@src/contents/plasmo-overlay.css"
 import { Toaster } from 'react-hot-toast';
 import { iframeMessageSystem } from '@src/app/utils/IFrameMessageSystem';
 import Browser from 'webextension-polyfill';
-import { sendToBackground } from '@plasmohq/messaging';
-import { FREE_MODE } from '@src/config/features';
 import {
     getActiveServer,
     independentUrlFor,
@@ -32,7 +30,6 @@ export const getShadowHostId = () => "tweet-cards-overlay"
 
 const AnchorOverlay: React.FC<PlasmoCSUIProps> = ({ anchor }) => {
     const iframeRef = useRef<HTMLIFrameElement>(null)
-    const setIsActivated = useTweetsStore((state) => state.setIsActivated);
 
     // 渲染地址来自用户选的服务器，所以要先读一次 storage 再挂 iframe。
     // 空字符串时先不渲染，避免用默认地址加载完再换一次造成重复请求。
@@ -68,27 +65,8 @@ const AnchorOverlay: React.FC<PlasmoCSUIProps> = ({ anchor }) => {
     }, []);
 
 
-    useEffect(() => {
-        // 免费模式：直接放行。既不请求 Gumroad，也不让后台校验结果把 true 覆盖回去。
-        if (FREE_MODE) {
-            setIsActivated(true);
-            return;
-        }
-        sendToBackground({
-            name: 'code',
-            body: {
-                action: 'check',
-            }
-        }).then((data) => {
-            if (!data) {
-                setIsActivated(false);
-                return;
-            }
-            const isNotActivated = data?.subscription_ended_at || data?.subscription_cancelled_at || data?.subscription_failed_at
-            setIsActivated(!isNotActivated);
-        }
-        );
-    }, [])
+    // 这里原本会向后台查一次 Gumroad license，未激活就把功能锁上。
+    // 付费已经整体去掉，后台的 code 消息端点也一并删了，所以这一步不再需要。
 
 
     return (

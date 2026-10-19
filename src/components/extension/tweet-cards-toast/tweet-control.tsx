@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Activity, Clock, Heart, Twitter, User } from 'lucide-react';
-import { useTweetsStore, type TweetControlState } from '../use-tweet-collection';
+import { type TweetControlState } from '../use-tweet-collection';
 import LabelWithIcon from '../label-with-icon';
 
 
@@ -10,7 +10,6 @@ interface TweetControlProps {
 }
 
 const TweetControl: React.FC<TweetControlProps> = ({ onChange }) => {
-  const isActivated = useTweetsStore((state) => state.isActivated);
   const [state, setState] = useState<TweetControlState>({
     showUser: true,
     showActions: true,
@@ -21,10 +20,6 @@ const TweetControl: React.FC<TweetControlProps> = ({ onChange }) => {
 
   const toggleOption = (option: keyof TweetControlState) => {
     const newState = { ...state, [option]: !state[option] };
-    if (!isActivated) {
-      useTweetsStore.getState().setShowCodeDialog(true);
-      return;
-    }
     setState(newState);
     onChange(newState);
   };
@@ -33,7 +28,6 @@ const TweetControl: React.FC<TweetControlProps> = ({ onChange }) => {
     <div className=" ">
       <LabelWithIcon
         label="CONTROLS"
-        isActivated={isActivated}
         className='mb-2'
       />
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'; // Assuming you're using Radix UI
-import { useTweetsStore } from '../use-tweet-collection';
 import LabelWithIcon from '../label-with-icon';
 
 interface ScaleControlProps {
@@ -9,13 +8,10 @@ interface ScaleControlProps {
 }
 
 const ScaleControl: React.FC<ScaleControlProps> = ({ value, onChange }) => {
-    const isActivated = useTweetsStore((state) => state.isActivated);
-
     return (
         <div>
             <LabelWithIcon
                 label="IMAGE QUALITY"
-                isActivated={isActivated}
                 className='mb-2'
             />
             <Tabs className='w-full' value={String(value)} onValueChange={(value) => onChange(Number(value))}>

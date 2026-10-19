@@ -1,7 +1,6 @@
 import type { CardStore, XConfig } from "@src/hooks/useCardStore";
 import { create } from "zustand";
 import { fontSizeMap } from "./tweet-cards-toast/font-control";
-import { FREE_MODE } from "@src/config/features";
 
 export interface TweetControlState {
     showUser: boolean;
@@ -26,8 +25,6 @@ interface TweetCollection {
 
     cardConfig: Partial<CardConfig>;
     setCardConfig: (cardConfig: Partial<CardConfig>) => void;
-    isActivated: boolean;
-    setIsActivated: (isActivated: boolean) => void;
     imageSrc?: string;
     setImageSrc: (imageSrc: string) => void;
     activeTab: string,
@@ -40,10 +37,6 @@ interface TweetCollection {
     updateTweet: (tweet: XConfig) => void;
     moveTweet: (from: number, to: number) => void;
     resetTweets: () => void;
-    // const [showCodeDialog, setShowCodeDialog] = useState(false);
-    showCodeDialog: boolean;
-    setShowCodeDialog: (showCodeDialog: boolean) => void;
-
 
 }
 
@@ -61,18 +54,6 @@ export const useTweetsStore = create<TweetCollection>(
                     ...oldCardConfig,
                     ...cardConfig
                 }
-            })
-        },
-        showCodeDialog: false,
-        setShowCodeDialog: (showCodeDialog: boolean) => {
-            set({
-                showCodeDialog
-            })
-        },
-        isActivated: FREE_MODE,
-        setIsActivated: (isActivated: boolean) => {
-            set({
-                isActivated
             })
         },
         imageSrc: '',

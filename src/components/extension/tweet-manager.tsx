@@ -12,7 +12,6 @@ const TweetManager: React.FC<{
     onReset?: (tweetInfos: XConfig[]) => void;
     onDragEnd?: (tweetInfos) => void;
 }> = ({ tweetInfos, onRemoveItem, onReset, onDragEnd }) => {
-    const isActivated = useTweetsStore((state) => state.isActivated);
     const tweets = useTweetsStore(state => state.tweets);
     const setTweets = useTweetsStore(state => state.setTweets);
 
