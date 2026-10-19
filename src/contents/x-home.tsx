@@ -63,7 +63,7 @@ const PlasmoInline: React.FC<PlasmoCSUIProps> = ({ anchor, }) => {
     // }, [isVisible]);
 
     // // return (
-    // //     <div className="x-cards-button-group">
+    // //     <div className="tweet-cards-button-group">
     // //         <CardButton anchor={anchor} />
     // //     </ div>
     // // )

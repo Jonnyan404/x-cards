@@ -2,7 +2,7 @@ import type { PlasmoMessaging } from "@plasmohq/messaging"
 import * as _ from 'lodash-es'
 import Browser from "webextension-polyfill";
 
-const key = 'xCardsLicense';
+const key = 'tweetCardsLicense';
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     const licenseKey = req.body.licenseKey;

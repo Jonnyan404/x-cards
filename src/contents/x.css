@@ -53,7 +53,7 @@
   cursor: pointer;
 }
 
-.x-cards-button-group {
+.tweet-cards-button-group {
   display: flex;
   justify-content: space-between;
   align-items: center;

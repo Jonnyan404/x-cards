@@ -28,3 +28,14 @@ export const welcomeUrl = () => `${WEBSITE_URL}/welcome/`;
 export const independentUrl = () => `${WEBSITE_URL}/independent/`;
 
 export const tweetApiUrl = (url: string) => `${WEBSITE_URL}/api/x?url=${url}`;
+
+/**
+ * Chrome 商店的安装地址，站点上所有「安装扩展」的按钮都引用这里。
+ *
+ * 目前仍指向上游那个在架的 "X Card" —— Tweet Cards 自己的商品还没发布。
+ * 发布后按 STORE.md 拿到 extension ID，把这里换成
+ *   https://chromewebstore.google.com/detail/<你的 id>
+ * 全站只需改这一行。
+ */
+export const EXTENSION_STORE_URL =
+    "https://chromewebstore.google.com/detail/x-card/mbinooofmcjhjklihfejnkkebffceeop";

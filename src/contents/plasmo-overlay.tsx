@@ -26,7 +26,7 @@ export const getStyle = () => {
     return style
 }
 
-export const getShadowHostId = () => "x-cards-overlay"
+export const getShadowHostId = () => "tweet-cards-overlay"
 
 
 
@@ -97,7 +97,7 @@ const AnchorOverlay: React.FC<PlasmoCSUIProps> = ({ anchor }) => {
             {websiteURL && (
             <iframe
                 ref={iframeRef}
-                id="x-card-ai"
+                id="tweet-card-ai"
                 src={websiteURL}
                 key={websiteURL}
                 style={{
@@ -181,7 +181,7 @@ export const render: PlasmoRender<Element> = async ({
 
     const style = document.createElement("style")
 
-    const wrapper = document.createElement('xcards-ui')
+    const wrapper = document.createElement('tweet-cards-ui')
 
 
     // Attach the wrapper to the document body

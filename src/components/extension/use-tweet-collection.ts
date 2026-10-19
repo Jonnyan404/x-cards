@@ -1,6 +1,6 @@
 import type { CardStore, XConfig } from "@src/hooks/useCardStore";
 import { create } from "zustand";
-import { fontSizeMap } from "./x-cards-toast/font-control";
+import { fontSizeMap } from "./tweet-cards-toast/font-control";
 import { FREE_MODE } from "@src/config/features";
 
 export interface TweetControlState {

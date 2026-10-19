@@ -114,7 +114,7 @@ export const InputCode = ({ onClose }) => {
                     }}>
                         <p className="text-sm text-gray-300 mb-2" >Click Post this message:</p>
                         <p className="text-sm text-white font-medium">
-                            "X Cards: Power Up Your Tweet Marketing on X.com<a href="https://x.com/IndieDevr" target="_blank">@IndieDevr</a> #IndieDevTool"
+                            "Tweet Cards: Power Up Your Tweet Marketing on X.com<a href="https://x.com/IndieDevr" target="_blank">@IndieDevr</a> #IndieDevTool"
                         </p>
                     </div>
                     <p className="mt-3 text-sm ">

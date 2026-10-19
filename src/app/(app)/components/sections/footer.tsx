@@ -9,15 +9,15 @@ export const FooterSection = () => {
                     <div className="col-span-full xl:col-span-2">
                         <Link href="#" className="flex font-bold items-center">
                             {/* <ChevronsDownIcon className="w-9 h-9 mr-2 bg-gradient-to-tr from-primary via-primary/70 to-primary rounded-lg border border-secondary" /> */}
-                            <img className="w-9 h-9 mr-2 " src={Logo.src} alt="xcards" ></img>
-                            <h3 className="text-2xl">X Cards</h3>
+                            <img className="w-9 h-9 mr-2 " src={Logo.src} alt="Tweet Cards" ></img>
+                            <h3 className="text-2xl">Tweet Cards</h3>
                         </Link>
                     </div>
 
                     <div className="flex flex-col gap-2">
                         <h3 className="font-bold text-lg">Contact</h3>
                         <div>
-                            <Link href="https://github.com/hzeyuan/x-cards" className="opacity-60 hover:opacity-100">
+                            <Link href="https://github.com/Jonnyan404/x-cards" className="opacity-60 hover:opacity-100">
                                 Github
                             </Link>
                         </div>

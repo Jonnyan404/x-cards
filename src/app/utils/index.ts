@@ -129,8 +129,8 @@ export const downloadImage = async (tweetInfo: XConfig | XConfig[], cardConfig =
     cardConfig,
   }, 3000);
   const { url, dataUrl } = value;
-  const xName = 'x-card'
-  //  tweetInfo.username || 'x-card';
+  const xName = 'tweet-cards'
+  //  tweetInfo.username || 'tweet-cards';
   const link = document.createElement('a');
   link.download = `${xName}.${cardConfig?.format || 'png'}`
   link.href = dataUrl;
@@ -140,7 +140,7 @@ export const downloadImage = async (tweetInfo: XConfig | XConfig[], cardConfig =
 
 
 export const sendMessageToIframe = async (name: string, data: any, timeout: number = 10000): Promise<any> => {
-  const iframe = findXCardsIframe();
+  const iframe = findTweetCardsIframe();
   if (!iframe || !iframe.contentWindow) {
     throw new Error('Invalid iframe');
   }
@@ -259,11 +259,11 @@ export function extractTweetInfo(postElement) {
   return tweet;
 }
 
-export const findXCardsIframe = () => {
-  const shadowRoot = document.querySelector("xcards-ui")?.shadowRoot;
+export const findTweetCardsIframe = () => {
+  const shadowRoot = document.querySelector("tweet-cards-ui")?.shadowRoot;
   if (!shadowRoot) throw new Error('Shadow root not found');
 
-  const iframe = shadowRoot.getElementById('x-card-ai') as HTMLIFrameElement;
+  const iframe = shadowRoot.getElementById('tweet-card-ai') as HTMLIFrameElement;
   if (!iframe) throw new Error('Iframe not found');
   return iframe;
 

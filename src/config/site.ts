@@ -1,9 +1,9 @@
 import { WEBSITE_URL, LEGACY_STATIC_HOST } from "./urls"
 
 const baseSiteConfig = {
-    name: "X Cards",
+    name: "Tweet Cards",
     description:
-        "Share X anywhere, any format. A Chrome extension for easy access to X posts in multiple formats.",
+        "Turn X posts into shareable cards. A Chrome extension and web app for exporting tweets as images, Markdown or JSON.",
     url: WEBSITE_URL,
     keywords: [
         "X.com",
@@ -35,7 +35,7 @@ const baseSiteConfig = {
     },
     ogImage: `${LEGACY_STATIC_HOST}/x-cards/favicon/x-cards-og.png`,
     links: {
-        github: "https://github.com/hzeyuan/x-cards",
+        github: "https://github.com/Jonnyan404/x-cards",
     },
 }
 

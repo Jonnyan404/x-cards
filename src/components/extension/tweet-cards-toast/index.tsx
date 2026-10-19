@@ -174,14 +174,14 @@ export const PreviewToast: React.FC<PreviewToastProps> = ({ tweetInfo, tweetInfo
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `x-cards.md`;
+            a.download = `tweet-cards.md`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             return;
         }
-        const xName = 'x-card'
+        const xName = 'tweet-cards'
         const data = await sendMessageToIframe('generate-card-local', {
             tweetInfo: tweets,
             cardConfig: {
@@ -307,7 +307,7 @@ export const PreviewToast: React.FC<PreviewToastProps> = ({ tweetInfo, tweetInfo
     }}>
         <div className="flex justify-between items-center mb-2">
             <div className='flex gap-x-2  justify-center items-center '>
-                <h2 className="text-sm font-semibold">x-cards options</h2>
+                <h2 className="text-sm font-semibold">tweet-cards options</h2>
             </div>
         </div>
 

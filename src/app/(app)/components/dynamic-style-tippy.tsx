@@ -2,7 +2,7 @@ import Tippy from "@tippyjs/react";
 import { useEffect, useRef } from "react";
 
 export const DynamicStyleTippyComponent = ({ children, content, tippyOptions = {} }) => {
-  const styleId = 'x-cards-dropdown-styles';
+  const styleId = 'tweet-cards-dropdown-styles';
   const tippyRef = useRef(null);
 
   useEffect(() => {

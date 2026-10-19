@@ -1,6 +1,7 @@
 // "use client"
 import Image from 'next/image';
 import Logo from '@assets/icon.png';
+import { EXTENSION_STORE_URL } from '@src/config/urls';
 
 const AppLayout = ({ children }) => {
 
@@ -14,10 +15,10 @@ const AppLayout = ({ children }) => {
                 <div className="bg-gradient-to-br from-green-300 via-blue-500 to-purple-600 fixed w-full px-4 py-2 text-white !bg-gradient-to-r">
                     <p className="flex items-center justify-center text-sm font-medium !text-white">
                         {" "}
-                        X cards also support the chrome extension version.{" "}
+                        Tweet Cards also comes as a Chrome extension.{" "}
                         <a
                             className="underline flex items-center"
-                            href="https://chromewebstore.google.com/detail/x-card/mbinooofmcjhjklihfejnkkebffceeop"
+                            href={EXTENSION_STORE_URL}
                             target="_blank"
                         >
                             <span className="ml-2 text-xs">Get Chrome Extension →</span>
@@ -28,7 +29,7 @@ const AppLayout = ({ children }) => {
                     <div className="mr-4 hidden md:flex">
                         <a className="mr-6 flex items-center space-x-2" href="/">
                             <Image className='w-6 h-6' alt="logo" src={Logo} width={24} ></Image>
-                            <span className="hidden  sm:inline-block  whitespace-nowrap">X Cards</span>
+                            <span className="hidden  sm:inline-block  whitespace-nowrap">Tweet Cards</span>
                         </a>
                     </div>
                     <div className="w-full flex justify-center">

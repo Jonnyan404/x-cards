@@ -22,8 +22,8 @@ export * from "./server-url";
  */
 
 // 导出来给 content script 监听：改了服务器地址要能当场生效，不用刷新 x.com
-export const SERVERS_KEY = "xCardsServers";
-export const ACTIVE_SERVER_KEY = "xCardsActiveServerId";
+export const SERVERS_KEY = "tweetCardsServers";
+export const ACTIVE_SERVER_KEY = "tweetCardsActiveServerId";
 
 export async function getServers(): Promise<ServerEntry[]> {
     const stored = await Browser.storage.local.get(SERVERS_KEY);

@@ -4,7 +4,7 @@ import pRetry from 'p-retry';
 import { copyImage, extractTweetInfo, getPostThread } from "@src/app/utils";
 import toast from 'react-hot-toast';
 import * as _ from 'lodash-es';
-import { PreviewToast } from "./x-cards-toast";
+import { PreviewToast } from "./tweet-cards-toast";
 import { useTweetsStore } from "./use-tweet-collection";
 import type { PlasmoCSUIAnchor } from "plasmo";
 import { Plus } from "lucide-react";
